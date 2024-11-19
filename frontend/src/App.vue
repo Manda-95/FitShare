@@ -1,47 +1,64 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import TrainingPlans from './components/TrainingPlans.vue';
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <div id="app">
+    <header>
+      <h1 class="title">Programme d'entraînement</h1>
+    </header>
+    <main>
+      <TrainingPlans />
+    </main>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+/* Global styles */
+#app {
+  font-family: Arial, sans-serif;
+  margin: 0 auto;
+  text-align: center; /* Centrer le texte */
+  background-color: #f5f5f5; /* Fond clair */
+  min-height: 100vh; /* Assurer une hauteur minimale de la page */
+  display: flex;
+  flex-direction: column; /* Disposition en colonne */
+  align-items: center; /* Centre horizontalement */
+  justify-content: flex-start; /* Met le contenu en haut */
+  padding: 1rem;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+/* Titre principal */
+.title {
+  font-size: 2.5rem; /* Taille du texte plus grande */
+  font-weight: bold; /* Texte en gras */
+  margin-bottom: 2rem; /* Espacement en dessous */
+  color: #333; /* Couleur sombre pour le titre */
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+/* Main content styling */
+main {
+  width: 100%;
+  max-width: 600px; /* Limiter la largeur maximale */
+  padding: 1rem;
+  background: white; /* Fond blanc pour contraster */
+  border-radius: 10px; /* Arrondir les bords */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ajouter une ombre subtile */
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+label {
+  display: block; /* Chaque label sur une nouvelle ligne */
+  margin-bottom: 0.5rem; /* Espacement sous le label */
+  font-weight: bold; /* Texte des labels en gras */
+  color: #555; /* Couleur des labels */
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+select {
+  width: 100%; /* Sélecteurs prennent toute la largeur */
+  padding: 0.5rem;
+  margin-bottom: 1rem; /* Espacement entre chaque champ */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
 }
 </style>
