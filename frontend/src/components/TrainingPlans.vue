@@ -1,47 +1,49 @@
 <template>
-  <div>
+  <div class="page-container">
     <h1>Programme d'entraînement</h1>
 
-    <!-- Filtres -->
-    <div>
+    <div class="filters">
       <label>Niveau:</label>
-      <select v-model="filters.level" @change="fetchPlans">
-        <option value="">tous</option>
+      <select v-model="filters.level">
+        <option value="">Tous</option>
         <option value="Débutant">Débutant</option>
         <option value="Intermédiaire">Intermédiaire</option>
         <option value="Avancé">Avancé</option>
       </select>
 
       <label>Objectif:</label>
-      <select v-model="filters.goal" @change="fetchPlans">
-        <option value="">tous</option>
+      <select v-model="filters.goal">
+        <option value="">Tous</option>
         <option value="Perte de poids">Perte de poids</option>
         <option value="Renforcement musculaire">Renforcement musculaire</option>
       </select>
 
       <label>Sport:</label>
-      <select v-model="filters.sport" @change="fetchPlans">
-        <option value="">tous</option>
+      <select v-model="filters.sport">
+        <option value="">Tous</option>
         <option value="Musculation">Musculation</option>
         <option value="Running">Running</option>
       </select>
     </div>
 
-    <!-- Liste des programmes -->
-    <div v-if="loading">Loading...</div>
-    <ul v-else>
-      <li v-for="plan in plans" :key="plan.id">
-        {{ plan.title }} - {{ plan.level }} - {{ plan.goal }} - {{ plan.sport }}
-        <button @click="addToPlanning(plan)">Ajouter au planning</button>
-      </li>
-    </ul>
+    <div class="buttons-container">
+      <button @click="fetchProgramExercises" class="fetch-program-btn">
+        Obtenir exercices du programme
+      </button>
+      <button @click="toggleForm" class="add-program-btn">
+        Ajouter un programme
+      </button>
+    </div>
 
-    <!-- Bouton pour ajouter un nouveau programme -->
-    <button @click="toggleForm" class="add-program-btn">
-      Ajouter un programme
-    </button>
+    <div v-if="exercises.length" class="exercises-list">
+      <h2>Exercices du programme</h2>
+      <ul>
+        <li v-for="exercise in exercises" :key="exercise.id">
+          {{ exercise.name }}
+        </li>
+      </ul>
+    </div>
 
-    <!-- Formulaire pour ajouter un programme -->
     <div v-if="showForm" class="form-container">
       <h2>Ajouter un nouveau programme</h2>
       <form @submit.prevent="submitProgram">
@@ -71,6 +73,20 @@
           <label>Programme:</label>
           <input v-model="newProgram.title" type="text" placeholder="Nom du programme" required />
         </div>
+        <div>
+          <label>Exercices du programme :</label>
+          <div v-if="loadingFormExercises">Chargement des exercices...</div>
+          <div v-else class="exercise-list">
+            <div v-for="exercise in formExercises" :key="exercise.id" class="exercise-item">
+              <input
+                type="checkbox"
+                :value="exercise.id"
+                v-model="newProgram.exercises"
+              />
+              <span>{{ exercise.name }}</span>
+            </div>
+          </div>
+        </div>
         <button type="submit">Ajouter au planning</button>
       </form>
     </div>
@@ -78,126 +94,156 @@
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
   data() {
     return {
-      showForm: false, // Afficher ou masquer le formulaire
+      showForm: false,
       newProgram: {
         level: "",
         goal: "",
         sport: "",
         title: "",
+        exercises: [],
       },
-      plans: [], // Liste des programmes
       filters: {
         level: "",
         goal: "",
         sport: "",
       },
-      loading: false,
+      exercises: [],
+      formExercises: [],
+      plans: [],
+      loadingExercises: false,
+      loadingFormExercises: false,
     };
   },
   methods: {
-    async fetchPlans() {
-      this.loading = true;
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/plans", {
-          params: this.filters,
-        });
-        this.plans = response.data;
-      } catch (error) {
-        console.error("Error fetching plans:", error);
-      } finally {
-        this.loading = false;
+    toggleForm() {
+      this.showForm = !this.showForm;
+      if (this.showForm) {
+        this.fetchFormExercises();
       }
     },
-    toggleForm() {
-      this.showForm = !this.showForm; // Alterner entre affichage et masquage du formulaire
+    fetchProgramExercises() {
+      if (!this.filters.level && !this.filters.goal && !this.filters.sport) {
+        alert("Veuillez sélectionner un niveau, un objectif et un sport pour chercher un programme.");
+        this.exercises = [];
+        return;
+      }
+      this.exercises = [
+        { id: 1, name: "Squat" },
+        { id: 2, name: "Push-up" },
+        { id: 3, name: "Pull-up" },
+      ];
+      alert("Exercices récupérés avec succès !");
+    },
+    fetchFormExercises() {
+      this.loadingFormExercises = true;
+      setTimeout(() => {
+        this.formExercises = [
+          { id: 1, name: "Squat" },
+          { id: 2, name: "Deadlift" },
+          { id: 3, name: "Bench Press" },
+          { id: 4, name: "Pull-up" },
+          { id: 5, name: "Plank" },
+        ];
+        this.loadingFormExercises = false;
+      }, 1000);
     },
     submitProgram() {
-      // Ajouter le nouveau programme à la liste
-      const newPlan = { ...this.newProgram, id: Date.now() }; // Ajoute un ID unique
+      const newPlan = { ...this.newProgram, id: Date.now() };
       this.plans.push(newPlan);
-
-      // Réinitialiser le formulaire
       this.newProgram = {
         level: "",
         goal: "",
         sport: "",
         title: "",
+        exercises: [],
       };
-
-      // Masquer le formulaire
       this.showForm = false;
-
       alert("Programme ajouté avec succès !");
     },
-    addToPlanning(plan) {
-      alert(`Programme "${plan.title}" ajouté au planning.`);
-    },
-  },
-  mounted() {
-    this.fetchPlans();
   },
 };
 </script>
 
 <style scoped>
-/* Bouton principal */
-
-.add-program-btn {
-  margin-top: 2rem;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.page-container {
+  background-color: #fff;
+  color: #000;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  width: 100%;
 }
 
-.add-program-btn:hover {
-  background-color: #0056b3;
+.filters {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 2rem;
 }
 
-/* Formulaire */
-.form-container {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-form div {
-  margin-bottom: 1rem;
-}
-
-form label {
-  display: block;
+label {
+  color: #000;
   margin-bottom: 0.5rem;
-  font-weight: bold;
+  display: block;
 }
 
-form select,
-form input {
+select {
   width: 100%;
   padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: #f5f5f5;
+  color: #000;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-form button {
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+button {
   padding: 0.5rem 1rem;
-  background-color: #28a745;
-  color: white;
-  border: none;
+  background-color: #87ceeb;
+  color: #fff;
+  font-weight: bold;
   border-radius: 5px;
+  border: none;
   cursor: pointer;
 }
 
-form button:hover {
-  background-color: #218838;
+button:hover {
+  background-color: #00bfff;
+}
+
+.exercises-list {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.exercises-list h2 {
+  color: #000;
+  margin-bottom: 1rem;
+}
+
+.exercises-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.exercises-list li {
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  background-color: #f5f5f5;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
